@@ -3,6 +3,30 @@ import argparse
 
 COUNTER = 0
 
+class Stack:
+    def __init__(self):
+        self.stack = []
+
+    def pop(self):
+        if self.isEmpty():
+            return None
+        else:
+            return self.stack.pop()
+
+    def push(self,val):
+        return self.stack.append(val)
+
+    def size(self):
+        return len(self.stack)
+
+    def isEmpty(self):
+        return self.size() == 0
+    
+    def __str__(self):
+        if self.isEmpty():
+            return 'empty stack'
+        return str(self.stack).strip('[]')
+
 class BSTNode:
     def __init__(self, data=''):
         self.data = data
@@ -174,12 +198,32 @@ def inorder_rightSize(root):
     for i, s in inorder_rightSize(root.right):
         yield i, s
 
+# non-recursive inorder traversal
+def inorder_stack(root):
+    S = Stack()
+    curr = root
+    while curr != None or not S.isEmpty():
+        # find left most
+        while curr != None:
+            S.push(curr)
+            curr = curr.left
+
+        # pop
+        curr = S.pop()
+        yield curr.data
+
+        # right tree
+        curr = curr.right
+
 # P4
 def keysInRange(root, minVal, maxVal):
+    global COUNTER
+    
     if root == None:
         return
     c1 = minVal - root.data
     c2 = root.data - maxVal
+    COUNTER += 2
     if c1 <= 0 and c2 <= 0:
         # min <= root <= max
         yield root.data
@@ -209,6 +253,17 @@ def kthLargest(root, k=1):
     else:
         return kthLargest(root.left, k-1-root.rightSize)
 
+def test0():
+    t = BST()
+    for i in [10, 17, 3, 90, 22, 7, 40, 15]:
+        t.insert(i)
+    print(t)
+
+    t = BST()
+    for i in [25, 10, 40, 2, 20, 30, 45, 15, 35]:
+        t.insert(i)
+    print(t)
+
 def test2():
     global COUNTER
     t = BST()
@@ -234,13 +289,16 @@ def test3():
     print(t2)
 
 def test4():
+    global COUNTER
     t = BST()
     for i in [10, 17, 3, 90, 22, 7, 40, 15]:
         t.insert(i)
     print(t)
     print('keys in range [4, 20]: ')
+    COUNTER = 0
     for i in keysInRange(t.root, 4, 20):
         print(i)
+    print('# of unit of work: %d' % COUNTER)
 
 def test5():
     t = BST()
